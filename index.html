@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Quiz Game</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  overflow:hidden;
+  background:black;
+  color:white;
+}
+
+/* 🌌 BINTANG */
+.stars {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:url('https://i.imgur.com/9aZ6Q6G.png');
+  animation: moveStars 60s linear infinite;
+}
+
+@keyframes moveStars {
+  from {background-position:0 0;}
+  to {background-position:10000px 5000px;}
+}
+
+/* BOX */
+.box {
+  position:relative;
+  z-index:2;
+  width:90%;
+  max-width:360px;
+  margin:auto;
+  margin-top:60px;
+  background:rgba(0,0,0,0.7);
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
+}
+
+/* 👨‍🚀 KARAKTER */
+.character {
+  width:80px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+  100%{transform:translateY(0);}
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:10px;
+  background:#00c6ff;
+  color:black;
+  font-weight:bold;
+}
+
+/* GAME OVER ANIMASI */
+.explosion {
+  font-size:50px;
+  animation: boom 0.6s ease;
+}
+
+@keyframes boom {
+  0%{transform:scale(0);}
+  100%{transform:scale(1.5);}
+}
+
+.hidden{display:none;}
+.timer{color:red;}
+</style>
+
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<div class="box">
+
+<!-- LOBBY -->
+<div id="menu">
+  <img src="https://i.imgur.com/QZ6P7bR.png" class="character">
+  <h2>🚀 SPACE QUIZ</h2>
+  <button onclick="start()">Mulai Misi</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden">
+  <h3 id="level"></h3>
+  <div class="timer" id="timer"></div>
+  <h2 id="soal"></h2>
+  <div id="pilihan"></div>
+</div>
+
+<!-- GAME OVER -->
+<div id="over" class="hidden">
+  <div class="explosion">💥</div>
+  <h2>Misi Gagal!</h2>
+  <p id="hasil"></p>
+  <button onclick="ulang()">Ulangi</button>
+  <button onclick="menu()">Menu</button>
+</div>
+
+</div>
+
+<!-- 🎵 SOUND -->
+<audio id="bgm" loop>
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+</audio>
+
+<script>
+
+let level=1, waktu=10, interval, current;
+
+// START
+function start(){
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+
+  document.getElementById("bgm").play();
+
+  tampilSoal();
+}
+
+// SOAL SMA + DUNIA
+function generate(){
+
+  let soalList = [
+    {t:"Hukum Newton ke-2?", o:["F=ma","E=mc2","V=IR","P=mv"], b:0},
+    {t:"Ibukota Kanada?", o:["Toronto","Ottawa","Vancouver","Montreal"], b:1},
+    {t:"Turunan x² adalah?", o:["x","2x","x²","2"], b:1},
+    {t:"Unsur kimia O adalah?", o:["Emas","Oksigen","Besi","Karbon"], b:1},
+    {t:"Planet terbesar?", o:["Mars","Bumi","Jupiter","Venus"], b:2}
+  ];
+
+  return soalList[Math.floor(Math.random()*soalList.length)];
+}
+
+// TAMPIL
+function tampilSoal(){
+  if(level>200) return menang();
+
+  current=generate();
+
+  document.getElementById("level").innerText="🚀 Level "+level;
+  document.getElementById("soal").innerText=current.t;
+
+  let html="";
+  current.o.forEach((o,i)=>{
+    html+=`<button onclick="cek(${i})">${o}</button>`;
+  });
+
+  document.getElementById("pilihan").innerHTML=html;
+
+  timer();
+}
+
+// TIMER
+function timer(){
+  waktu=10;
+  document.getElementById("timer").innerText=waktu;
+
+  interval=setInterval(()=>{
+    waktu--;
+    document.getElementById("timer").innerText=waktu;
+
+    if(waktu==0) kalah();
+  },1000);
+}
+
+// CEK
+function cek(j){
+  clearInterval(interval);
+
+  if(j!=current.b){
+    kalah();
+  } else {
+    level++;
+    tampilSoal();
+  }
+}
+
+// KALAH
+function kalah(){
+  clearInterval(interval);
+
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("over").classList.remove("hidden");
+
+  document.getElementById("hasil").innerText=
+    "Kamu gagal di Level "+level;
+}
+
+// MENANG
+function menang(){
+  document.getElementById("soal").innerText="🌟 Misi Selesai!";
+}
+
+// ULANG
+function ulang(){location.reload();}
+function menu(){location.reload();}
+
+</script>
+
+</body>
+</html>
